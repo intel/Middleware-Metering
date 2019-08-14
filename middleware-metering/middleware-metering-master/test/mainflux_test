@@ -1,0 +1,6 @@
+#!/bin/bash
+while :
+do 
+    ./mainflux-cli messages send CHANNEL_ID '[{"bn":"Dev1","n":"temp","u": "F", "v":88}, {"n":"hum","u": "g/m3", "v":50}]' THING_KEY
+    sleep 120
+done
