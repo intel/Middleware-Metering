@@ -1,7 +1,0 @@
-#!/bin/bash
-while :
-do 
-    curl -X POST http://localhost:48080/api/v1/event -d '{"device":"countcamera1","readings":[{"name":"caninecount","value":"3"}, {"name":"humancount","value":"2"}]}'
-    sleep 120
-done
-
