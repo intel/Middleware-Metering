@@ -1,6 +1,6 @@
 # Mainflux & EdgeX Metering Microservices 
 
-Katie Nguyen    
+Katie Nguyen   
 Intel Corporation 
 
 **Description:** The Mainflux and EdgeX metering microservices are add on containers to each platform respectively. Both services query the messages sent from preconfigured devices to the platform to then output an assortment of total reading / device message counts to a designated port. In addition to displaying message counts, the microservices also output local CPU and memory usage metrics. These message counts can be collected and graphed with the setup of Telegraf, InfluxDB, and Chronograf. Through modifying the Telegraf configuration file, the message counts and system info can be consumed into InfluxDB via the HTTP input plugin. From there, the data can be visualized in Chronograf to track specific message counts as well as local system info. The TIC stack can be setup locally or in the cloud depending on individual implementations. The two services work independently of one another or can be run simultaneously if so desired. 
@@ -205,7 +205,7 @@ Both microservices can be setup and tested through simulated devices. For the pu
 
 **Mainflux**: a sensor with a temperature and humidity reading
 
-**EdgeX**: a camera that detects and reports the number the humans and dogs in an image
+**EdgeX**: a camera that detects and reports the number of humans and dogs in an image
 
 ### Mainflux 
 - Configure the docker-compose file to the values in the tutorial above
