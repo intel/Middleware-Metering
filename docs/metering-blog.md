@@ -7,9 +7,11 @@ While metering is simply the act of measuring and recording the quantity of some
 
 **What does metering look like on edge middleware platforms?**
 
-In order to view metering in action, I have developed a simple cloud based metering solution for edge middleware platforms, specifically Mainflux and EdgeX. The solution consists of add-on microservices that look at incoming messages from preconfigured devices, which are connected to each platform. The services then query how many of each type of message has been sent to the platform from a specific device. Finally, the services output the counts of each message type as well as local CPU and memory usage to a designated port. These message counts can be collected and graphed with the setup of Telegraf, InfluxDB, and Chronograf. Through modifying the Telegraf configuration file, the message counts and system info can be consumed into InfluxDB via the HTTP input plugin. From there, the data can be visualized in Chronograf to track specific message counts as well as local system info. The TIC stack can be setup locally or in the cloud depending on individual implementations. The two services work independently of one another or can be run simultaneously if so desired.
+In order to view metering in action, I have developed a simple cloud based metering solution for edge middleware platforms, specifically Mainflux and EdgeX. The solution consists of add-on microservices that look at incoming messages from preconfigured devices, which are connected to each platform. The services then query how many of each type of message has been sent to the platform from a specific device. Finally, the services output the counts of each message type, as well as local CPU and memory usage, to a designated port. These message counts can be collected and graphed with the setup of Telegraf, InfluxDB, and Chronograf. Through modifying the Telegraf configuration file, the message counts and system info can be consumed into InfluxDB via the HTTP input plugin. From there, the data can be visualized in Chronograf to track specific message counts as well as local system info. The TIC stack can be setup locally or in the cloud depending on individual implementations. The two services work independently of one another or can be run simultaneously if so desired.
 
 **How to get started:**
+
+As noted in the setup instructions below, the protocol used throughout this tutorial is http, making it insecure if implemented as is. All http endpoints are configurable from the Docker configuration files, and the user can take the precautions to change these to https if so desired. All the resources needed to launch both the Mainflux and EdgeX metering microservices can be found in: https://github.com/intel/Middleware-Metering. 
 
 **Mainflux:**
 - Run Mainflux via Docker (https://github.com/mainflux/mainflux/)
@@ -140,18 +142,18 @@ Since the services are currently setup to track devices with two readings, some 
     ...
   ```
 - Add an additional query in the code 
- ```go
-  q = client.NewQuery(fmt.Sprintf("SELECT count(value) FROM messages WHERE \"name\"='%v'", dev1read3Name), "mainflux", "")
-	if response, err := c.Query(q); err == nil && response.Error() == nil {
-		if len(response.Results[0].Series) == 0 {
-			dev1read3 = `0`
+```go
+param = map[string]interface{}{"name": dev1read3Name}
+q = client.NewQueryWithParameters("SELECT count(value) FROM messages WHERE \"name\"= $name", "mainflux", "", param)
+  if response, err := c.Query(q); err == nil && response.Error() == nil {
+	  if len(response.Results[0].Series) == 0 {
+		  dev1read3 = `0`
 		} else {
 			tempVal := response.Results[0].Series[0].Values[0]
-		    dev1read3 = tempVal[countIndex].(json.Number)
+		  dev1read3 = tempVal[countIndex].(json.Number)
 		}
 	}
-
-  ```
+```
 
 **EdgeX:** 
 - Add additional variables in both the code and Docker configuration files
@@ -196,6 +198,25 @@ Since the services are currently setup to track devices with two readings, some 
 	}
 	reading3Count = (len(body) / msg_size) 
 ```
+
+**What if I don’t have physical devices but still want to test the metering microservices?**
+
+Both microservices have the ability to be setup and tested through simulated devices. In this particular case, the following simulated devices can be created to mimic actual devices connected to each platform. 
+
+**Mainflux:** a sensor with a temperature and humidity reading
+- Configure the docker-compose file to the values in the tutorial above
+- Move the mainflux_test file to the same directory as the Mainflux CLI
+- Open the test file and replace CHANNEL_ID and THING_KEY with the actual values from setup
+- Start Mainflux and the Mainflux Metering Microservice
+- Run the test: ```./mainflux_test```
+
+**EdgeX:** a camera that detects and reports the number of humans and dogs in an image
+- Configure the docker-compose file to the values in the tutorial above
+- Move the edgex_test file to wherever is the most convenient
+- Start EdgeX and the EdgeX Metering Microservice
+- Run the test: ```./edgex_test```
+
+Both tests simulate the devices sending a new message to the platform with updates to their respective fields every 2 minutes. The increase in message counts can be viewed in both the microservice endpoint and in a Chronograf dashboard that is tracking these particular message counts.
   
 **Future Enhancements:**
 
